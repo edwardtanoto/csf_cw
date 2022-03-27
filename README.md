@@ -1,17 +1,17 @@
-** csf_cw **
+**csf_cw**
 (COMP1036) Computer Fundamentals Courseworks. Part of nand2tetris.org course.
 
 ## Coursework 1
 
-**Task 1 **
+**Task 1**
 Input:
 Write a database using the hardware simulator
 
-**Task 2 **
+**Task 2**
 Input:
 Take the functionality of Task 1 and add the ability for the data entry to happen sequentially. So if sequential load (sl) is turned on data will be entered onto the RAM in sequential order and will overwrite existing values once the RAM is full. In effect, this is creating Sequential Access Memory (SAM)
 
-**Task 3 **
+**Task 3**
 Input:
 Take the functionality of Task 1 and 2 and add the ability to use a 1 bit entry called ‘priority’.
 Output:
