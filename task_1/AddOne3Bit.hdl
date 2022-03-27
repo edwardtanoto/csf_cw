@@ -1,0 +1,10 @@
+/* Increment after next single button */
+
+CHIP AddOne3Bit{
+    IN in[3];
+    OUT out[3];
+    PARTS:
+    HalfAdder(a=in[0], b=true, sum=out[0], carry=car0);
+    HalfAdder(a=in[1], b=car0, sum=out[1], carry=car1);
+    HalfAdder(a=in[2], b=car1, sum=out[2], carry=car2);
+}

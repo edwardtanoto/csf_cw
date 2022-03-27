@@ -1,0 +1,9 @@
+//3 bit version of register    
+CHIP Register3Bit {
+    IN in[3],load;
+    OUT out[3];
+    PARTS:
+	Bit(in=in[0],load=load,out=out[0]);
+	Bit(in=in[1],load=load,out=out[1]);
+	Bit(in=in[2],load=load,out=out[2]); 
+}

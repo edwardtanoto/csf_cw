@@ -1,0 +1,127 @@
+//Part 1 COMP1036
+
+CHIP CW{
+    IN inID[16], inMARK[16], load, probe, address[3], sl, priority;
+    OUT outID[16], outMARK[16], sum[16], overflow;
+    PARTS:
+
+    /*
+        Task 1
+        Goals: 
+            Load the address if probe and load is 1
+            If load is 1, save the value of inID and inMark
+    */
+
+    Register(in=inID, load=loadon1, out=ID1);
+    Register(in=inID, load=loadon2, out=ID2);
+    Register(in=inID, load=loadon3, out=ID3);
+    Register(in=inID, load=loadon4, out=ID4);
+    Register(in=inID, load=loadon5, out=ID5);
+    Register(in=inID, load=loadon6, out=ID6);
+    Register(in=inID, load=loadon7, out=ID7);
+    Register(in=inID, load=loadon8, out=ID8);
+
+    Register(in=inMARK, load=loadon1, out=markin1);
+    Register(in=inMARK, load=loadon2, out=markin2);
+    Register(in=inMARK, load=loadon3, out=markin3);
+    Register(in=inMARK, load=loadon4, out=markin4);
+    Register(in=inMARK, load=loadon5, out=markin5);
+    Register(in=inMARK, load=loadon6, out=markin6);
+    Register(in=inMARK, load=loadon7, out=markin7);
+    Register(in=inMARK, load=loadon8, out=markin8);
+
+    /*
+        Task 2
+        Probe
+        Goals: 
+            Find ID that has the same value with inID, if its the same, return 0
+    */
+    
+    EqualID(a=inID,b=ID1,out=equalcheck1);
+    EqualID(a=inID,b=ID2,out=equalcheck2);
+    EqualID(a=inID,b=ID3,out=equalcheck3);
+    EqualID(a=inID,b=ID4,out=equalcheck4);
+    EqualID(a=inID,b=ID5,out=equalcheck5);
+    EqualID(a=inID,b=ID6,out=equalcheck6);
+    EqualID(a=inID,b=ID7,out=equalcheck7);
+    EqualID(a=inID,b=ID8,out=equalcheck8);
+
+    //If Equalcheck8 is 8, it means id and inID is the same
+    Mux16(a=markin1, b=false, sel=equalcheck1, out=temp1);
+    Mux16(a=markin2, b=false, sel=equalcheck2, out=temp2);
+    Mux16(a=markin3, b=false, sel=equalcheck3, out=temp3);
+    Mux16(a=markin4, b=false, sel=equalcheck4, out=temp4);
+    Mux16(a=markin5, b=false, sel=equalcheck5, out=temp5);
+    Mux16(a=markin6, b=false, sel=equalcheck6, out=temp6);
+    Mux16(a=markin7, b=false, sel=equalcheck7, out=temp7);
+    Mux16(a=markin8, b=false, sel=equalcheck8, out=temp8);
+
+    //If there is a output that isnt 0, it will output in result
+    Or16(a=temp1, b=temp2, out=out1);
+    Or16(a=temp3, b=temp4, out=out2);
+    Or16(a=temp5, b=temp6, out=out3);
+    Or16(a=temp7, b=temp8, out=out4);
+    Or16(a=out1, b=out2, out=out5);
+    Or16(a=out3, b=out4, out=out6);
+    Or16(a=out5, b=out6, out=result);
+
+    /* Sequential Load */ 
+    And(a=load, b=sl, out=loadsl);
+    And(a=probe, b=sl, out=slprobe);
+    // It will add one address before storing the ID and mark in the register
+    Register3Bit(in=sladdress,load=true,out=count);
+    Mux3(a=address,b=count,sel=sl,out=lastadd);
+    AddOne3Bit(in=count,out=sladdress);
+    // DMux8Way will load into the same address as non SL address
+    DMux8Way(in=load,sel=lastadd,a=loadon1, b=loadon2, c=loadon3, d=loadon4, e=loadon5, f=loadon6, g=loadon7, h=loadon8);
+    
+    //Check out whether sl and probe is or on not
+    Mux16(a=false, b=result, sel=slprobe, out=resultslprobe);
+
+    /* Overflow 
+        Add all the ID, if its overflowed, make it 0    
+    */
+
+    Add16(a=ID1,b=ID2,out=sum1,output=over1);
+    Add16(a=ID3,b=ID4,out=sum2,output=over2);
+    Add16(a=ID5,b=ID6,out=sum3,output=over3);
+    Add16(a=ID7,b=ID8,out=sum4,output=over4);
+    Add16(a=sum1,b=sum2,out=sum12,output=over5);
+    Add16(a=sum3,b=sum4,out=sum34,output=over6);
+    Add16(a=sum12,b=sum34,out=final,output=over7);
+
+    Or(a=over1, b=over2, out=over12);
+    Or(a=over3, b=over4, out=over34);
+    Or(a=over5, b=over6, out=over56);
+    Or(a=over7, b=over56, out=over756);
+    Or(a=over12, b=over34, out=over1234);
+    Or(a=over56, b=over756, out=over567);
+    
+    Or(a=over1234, b=over567, out=of);
+    And(a=priority, b=of, out=overflow);
+
+    /*
+        If probe is equal one, ID and Mark will be displayed in outID and outMARK
+        First, we get the value of selected address first, then if the probe is one, we output the value 
+    */
+
+    Mux8Way16(a=ID1, b=ID2, c=ID3, d=ID4, e=ID5, f=ID6, g=ID7, h=ID8, sel=address, out=tempoutID);
+    Mux8Way16(a=markin1, b=markin2, c=markin3, d=markin4, e=markin5, f=markin6, g=markin7, h=markin8, sel=address, out=tempoutmark);
+
+    // Using Mux16 to Probe ID
+    Mux16(a=false, b=tempoutID, sel=probe, out=tempID);
+    Mux16(a=tempID, b=false,sel=sl, out=tempID2);
+    Mux16(a=tempID2, b=false, sel=priority, out=outID);
+
+    // Using Mux16 to Probe Mark
+    Mux16(a=false, b=tempoutmark, sel=probe, out=k1);
+    Mux16(a=k1, b=false, sel=sl, out=k2);
+    Mux16(a=k2, b=result, sel=slprobe, out=k3);
+    Mux16(a=k3, b=false, sel=priority, out=outMARK);
+
+    // Using Mux16 to Probe Priority
+    Mux16(a=false, b=final, sel=priority, out=check1);
+    Mux16(a=check1, b=false, sel=of, out=check);
+    Mux16(a=false, b=check, sel=probe, out=sum);
+
+}
